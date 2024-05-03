@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->Ip_Addr->setText("127.0.0.1");
     ui->PortNumber->setValue(5555);
-    ui->FindDirectoryEdit->setText("C:/Users/vladk/OneDrive");
+    ui->FindDirectoryEdit->setText("C:/Users/Admin/Desktop");
 
     ui->statusbar->showMessage("Клиент Отключен");
     ui->FindFileButton->setEnabled(false);
@@ -174,8 +174,11 @@ void MainWindow::on_StartMonitoringButton_clicked()
         QString selectedItemText = item->text();
         QJsonDocument doc;
         QJsonObject command;
+        QJsonObject data;
         command["command"] = "StartMonitoring";
-        command["data"] = selectedItemText;
+        data["path"] = selectedItemText;
+        data["size"] = ui->lineEdit_3->text().toInt();
+        command["data"] = data;
         doc.setObject(command);
         sendCommand(doc);
     }

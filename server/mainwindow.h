@@ -8,6 +8,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonValue>
+#include <QThread>
 
 namespace Ui {
 class MainWindow;
@@ -38,10 +39,14 @@ private:
     void sendCommand(QJsonDocument& json_cmd,
                      QTextStream& client_stream);
 
-    void FileMonitor(QString &filePath);
 
     Ui::MainWindow *ui;
     QTcpServer* m_tcpServer = nullptr;
+
+    QThread *thread;
+
+    void FileMonitor(QString& filePath, qint64& size);
+
 };
 
 #endif // MAINWINDOW_H

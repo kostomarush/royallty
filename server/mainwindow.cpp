@@ -6,13 +6,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
     m_tcpServer = new QTcpServer(this);
     if (m_tcpServer->listen(QHostAddress::AnyIPv4, 5555))
         ui->statusBar->showMessage("Сервер запущен");
+
     else
         ui->statusBar->showMessage("Ошибка запуска сервера");
 
     connect(m_tcpServer, &QTcpServer::newConnection, this, &MainWindow::onClientConnected);
+
+
 }
 
 MainWindow::~MainWindow()
@@ -23,6 +27,8 @@ MainWindow::~MainWindow()
 void MainWindow::onClientConnected()
 {
     QTcpSocket* clientConnection = m_tcpServer->nextPendingConnection();
+
+
     connect(clientConnection, &QTcpSocket::disconnected, this, &MainWindow::onClientDisconnected);
     connect(clientConnection, &QTcpSocket::readyRead, this, &MainWindow::onClientReadData);
 
@@ -68,7 +74,7 @@ void MainWindow::dispatchCommand(QJsonObject &json_cmd,
         QString cmd = val.toString();
         ui->listWidget->addItem("command: " + cmd);
         if (cmd == "getFindFiles") {
-            // отправка текущего времени
+
             command_getFiles(json_cmd, client_stream);
         }
         else if (cmd == "StartMonitoring") {
@@ -84,10 +90,6 @@ void MainWindow::dispatchCommand(QJsonObject &json_cmd,
         ui->listWidget->addItem("Ошибка JSON");
 }
 
-/*
- * { "answer": "getTme",
- *   "data": "16.05.2022 12:10:05" }
-*/
 void MainWindow::command_getFiles(QJsonObject &json_cmd,
                                  QTextStream &client_stream)
 {
@@ -121,22 +123,27 @@ void MainWindow::command_MonitoringFiles(QJsonObject &json_cmd,
 {
     if (json_cmd.contains("data")) {
         QJsonValue val = json_cmd["data"];
-            if (val.isString()) {
+                QJsonValue path_info = val["path"];
+                QJsonValue size_info = val["size"];
                 QJsonDocument doc;
-                QString path = val.toString();
-                qDebug() << path;
-                FileMonitor(path);
-                QJsonObject answer;
-                answer["answer"] = "getInfoFile";
-                answer["data"] = "info";
-                doc.setObject(answer);
-                sendCommand(doc, client_stream);
-            }
-            else
-                    ui->listWidget->addItem("Ошибка JSON");
+                if (path_info.isString()){
+                    QString path = path_info.toString();
+                    qint64 size = size_info.toInt();
+                    thread = new QThread(this);
+                    connect(thread, SIGNAL(started()), this, MainWindow::FileMonitor(path,size));
+                    thread->start();
+                    QJsonObject answer;
+                    answer["answer"] = "getInfoFile";
+                    answer["data"] = "info";
+                    doc.setObject(answer);
+                    sendCommand(doc, client_stream);
             }
             else
                 ui->listWidget->addItem("Ошибка JSON");
+    }
+            else
+                ui->listWidget->addItem("Ошибка JSON");
+
 }
 
 void MainWindow::sendCommand(QJsonDocument &json_cmd,
@@ -147,14 +154,18 @@ void MainWindow::sendCommand(QJsonDocument &json_cmd,
     client_stream << msg << flush;
 }
 
-void MainWindow::FileMonitor(QString &filePath){
+void MainWindow::FileMonitor(QString &filePath, qint64 &size){
     // Получаем начальный размер файла
+
+    qDebug() << filePath;
     qDebug() << QFileInfo(filePath).size();
+    qDebug() << QFileInfo(filePath).fileName();
+    qDebug() << QFileInfo(filePath).created().toString();
+    qDebug() << QFileInfo(filePath).lastModified().toString();
+
 
 
 }
-
-
 
 
 

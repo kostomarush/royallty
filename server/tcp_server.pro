@@ -13,8 +13,10 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+        monitoringobject.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    monitoringobject.h
 
 FORMS    += mainwindow.ui

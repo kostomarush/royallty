@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->Ip_Addr->setText("127.0.0.1");
     ui->PortNumber->setValue(5555);
-    ui->FindDirectoryEdit->setText("C:/Users/Admin/Desktop");
+    ui->FindDirectoryEdit->setText("C:/Users/vladk/OneDrive");
 
     ui->statusbar->showMessage("Клиент Отключен");
     ui->FindFileButton->setEnabled(false);

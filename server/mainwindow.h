@@ -9,6 +9,8 @@
 #include <QJsonArray>
 #include <QJsonValue>
 #include <QThread>
+#include "monitoringobject.h"
+
 
 namespace Ui {
 class MainWindow;
@@ -22,10 +24,16 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void makeThread();
+
+    void sendCommand(QJsonDocument& json_cmd,
+                     QTextStream& client_stream);
+
 private slots:
     void onClientConnected();
     void onClientDisconnected();
     void onClientReadData();
+    void FileMonitor();
 
 private:
     void dispatchCommand(QJsonObject& json_cmd,
@@ -33,19 +41,19 @@ private:
 
     void command_getFiles(QJsonObject& json_cmd, QTextStream& client_stream);
 
-    void command_MonitoringFiles(QJsonObject& json_cmd,
+    void command_StartMonitoringFiles(QJsonObject& json_cmd,
                                QTextStream& client_stream);
-
-    void sendCommand(QJsonDocument& json_cmd,
-                     QTextStream& client_stream);
+    void command_StopMonitoringFiles(QJsonObject& json_cmd,
+                               QTextStream& client_stream);
 
 
     Ui::MainWindow *ui;
+    QThread thread_monitoring;
+    MonitoringObject monitoringObject;
     QTcpServer* m_tcpServer = nullptr;
-
-    QThread *thread;
-
-    void FileMonitor(QString& filePath, qint64& size);
+    QString filePath;
+    qint64 size;
+    bool flag;
 
 };
 

@@ -37,11 +37,12 @@ void MonitoringObject::run()
 //            doc.setObject(answer);
             //m_mainWindow->sendCommand(doc,);
             qDebug() << "Размер файла превышен!";
-            qDebug() << "Путь к файлу:" << m_filePath;
-            qDebug() << "Новый размер файла:" << QFileInfo(m_filePath).size();
-            qDebug() << "Имя файла:"<< QFileInfo(m_filePath).fileName();
-            qDebug() << "Дата создания:"<< QFileInfo(m_filePath).created().toString();
-            qDebug() << "Дата последнего изменения:"<< QFileInfo(m_filePath).lastModified().toString();
+            QString path = m_filePath;
+            qint64 size = QFileInfo(m_filePath).size();
+            QString fileName = QFileInfo(m_filePath).fileName();
+            QString dataCreate = QFileInfo(m_filePath).created().toString();
+            QString lastModified = QFileInfo(m_filePath).lastModified().toString();
+            emit sendData(path, size, fileName, dataCreate, lastModified);
         }
     }
     emit finished();

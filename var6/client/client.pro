@@ -1,4 +1,4 @@
-QT       += core gui network sql
+QT       += core gui network sql axcontainer
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -17,16 +17,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp \
-    widget.cpp
+    mainwindow.cpp
 
 HEADERS += \
-    mainwindow.h \
-    widget.h
+    mainwindow.h
 
 FORMS += \
-    mainwindow.ui \
-    widget.ui
+    mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

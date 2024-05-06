@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&thread_monitoring, &QThread::started, &monitoringObject, &MonitoringObject::run);
     connect(&monitoringObject, &MonitoringObject::finished, &thread_monitoring, &QThread::terminate);
+    connect(&monitoringObject, &MonitoringObject::sendData, this, &MainWindow::sendDataSize);
     monitoringObject.moveToThread(&thread_monitoring);
 
 
@@ -55,15 +56,14 @@ void MainWindow::onClientDisconnected()
 void MainWindow::onClientReadData()
 {
     QTcpSocket* clientConnection = qobject_cast<QTcpSocket*>(sender());
-    QTextStream tcp_stream(clientConnection);
-
+    tcp_stream.setDevice(clientConnection);
     QString message = tcp_stream.readAll();
     ui->listWidget->addItem(message);
     QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8());
     if (doc.isObject()) {
         QJsonObject obj = doc.object();
         if (obj.contains("command")) {
-            dispatchCommand(obj, tcp_stream);
+            dispatchCommand(obj);
         }
         else
             ui->listWidget->addItem("Ошибка JSON");
@@ -72,8 +72,7 @@ void MainWindow::onClientReadData()
         ui->listWidget->addItem("Ошибка JSON");
 }
 
-void MainWindow::dispatchCommand(QJsonObject &json_cmd,
-                                 QTextStream &client_stream)
+void MainWindow::dispatchCommand(QJsonObject &json_cmd)
 {
     QJsonValue val = json_cmd["command"];
     if (val.isString()) {
@@ -81,14 +80,14 @@ void MainWindow::dispatchCommand(QJsonObject &json_cmd,
         ui->listWidget->addItem("command: " + cmd);
         if (cmd == "getFindFiles") {
 
-            command_getFiles(json_cmd, client_stream);
+            command_getFiles(json_cmd);
 
         }
         else if (cmd == "StartMonitoring") {
-            command_StartMonitoringFiles(json_cmd, client_stream);
+            command_StartMonitoringFiles(json_cmd);
         }
         else if (cmd == "StopMonitoring") {
-            command_StopMonitoringFiles(json_cmd, client_stream);
+            command_StopMonitoringFiles(json_cmd);
         }
         else
             ui->listWidget->addItem("Неизвестная команда");
@@ -97,8 +96,7 @@ void MainWindow::dispatchCommand(QJsonObject &json_cmd,
         ui->listWidget->addItem("Ошибка JSON");
 }
 
-void MainWindow::command_getFiles(QJsonObject &json_cmd,
-                                 QTextStream &client_stream)
+void MainWindow::command_getFiles(QJsonObject &json_cmd)
 {
     if (json_cmd.contains("data")) {
         QJsonValue val = json_cmd["data"];
@@ -116,7 +114,7 @@ void MainWindow::command_getFiles(QJsonObject &json_cmd,
             }
             answer.insert("files", filesArray);
             doc.setObject(answer);
-            sendCommand(doc, client_stream);
+            sendCommand(doc);
         }
         else
             ui->listWidget->addItem("Ошибка JSON");
@@ -125,8 +123,7 @@ void MainWindow::command_getFiles(QJsonObject &json_cmd,
         ui->listWidget->addItem("Ошибка JSON");
 }
 
-void MainWindow::command_StartMonitoringFiles(QJsonObject &json_cmd,
-                                       QTextStream &client_stream)
+void MainWindow::command_StartMonitoringFiles(QJsonObject &json_cmd)
 {
     if (json_cmd.contains("data")) {
         QJsonValue val = json_cmd["data"];
@@ -148,17 +145,42 @@ void MainWindow::command_StartMonitoringFiles(QJsonObject &json_cmd,
 
 }
 
-void MainWindow::command_StopMonitoringFiles(QJsonObject &json_cmd, QTextStream &client_stream)
+void MainWindow::command_StopMonitoringFiles(QJsonObject &json_cmd)
 {
     monitoringObject.setRunning(false);
 }
 
-void MainWindow::sendCommand(QJsonDocument &json_cmd,
-                             QTextStream &client_stream)
+QString MainWindow::JsonToString (QJsonObject *a)
+{
+    return QString (QJsonDocument (*a).toJson(QJsonDocument::Compact));
+}
+
+QJsonObject MainWindow::StringToJson (QString a)
+{
+    return QJsonDocument::fromJson (a.toUtf8()).object();
+}
+
+void MainWindow::sendCommand(QJsonDocument &json_cmd)
 {
     QString msg(json_cmd.toJson());
     ui->listWidget->addItem(msg);
-    client_stream << msg << flush;
+    tcp_stream << msg << flush;
+}
+
+void MainWindow::sendDataSize(QString path, qint64 size, QString fileName, QString dataCreate, QString lastModified)
+{
+    QJsonDocument doc;
+    QJsonObject answer;
+    QJsonObject data;
+    answer["answer"] = "getInfoFile";
+    data["path"] = path;
+    data["size"] = size;
+    data["fileName"] = fileName;
+    data["dataCreate"] = dataCreate;
+    data["lastModified"] = lastModified;
+    answer["data"] = data;
+    doc.setObject(answer);
+    sendCommand(doc);
 }
 
 void MainWindow::FileMonitor(){
@@ -166,6 +188,7 @@ void MainWindow::FileMonitor(){
 
 
 }
+
 
 
 

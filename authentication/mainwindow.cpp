@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->Ip_Addr->setText("127.0.0.1");
     ui->PortNumber->setValue(5555);
-    ui->FindDirectoryEdit->setText("C:/Users/vladk/OneDrive");
+    ui->FindDirectoryEdit->setText("C:/Users/Admin/Desktop");
 
     ui->statusbar->showMessage("Клиент Отключен");
     ui->FindFileButton->setEnabled(false);
@@ -25,6 +25,21 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_serverConnection, &QTcpSocket::connected, this, &MainWindow::onServerConnected);
     connect(m_serverConnection, &QTcpSocket::disconnected, this, &MainWindow::onServerDisconnected);
     connect(m_serverConnection, &QTcpSocket::readyRead, this, &MainWindow::onServerReadData);
+    ui->tableWidget->setColumnCount(5);
+    ui->tableWidget->setShowGrid(true);
+    ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
+    ui->tableWidget->hideColumn(0);
+    QStringList lst;
+
+    lst << trUtf8("Путь к файлу")
+        << trUtf8("Размер")
+        << trUtf8("Имя файла")
+        << trUtf8("Дата создания")
+        << trUtf8("Дата последнего изменения");
+
+    ui->tableWidget->setHorizontalHeaderLabels(lst);
 
 }
 
@@ -84,6 +99,7 @@ void MainWindow::onServerReadData()
         }
         else
             ui->FilesList->addItem("Ошибка JSON");
+
     }
     else
         ui->FilesList->addItem("Ошибка JSON");
@@ -146,16 +162,31 @@ void MainWindow::answer_getMonitoring(QJsonObject &json_cmd){
 
     if (json_cmd.contains("data")) {
         QJsonValue val = json_cmd["data"];
-        if (val.isString()){
-            QString name = val.toString();
-            ui->tableWidget->setRowCount(0);
-            ui->tableWidget->setColumnCount(0);
+            table = new QTableWidget(3,2);
+            QJsonValue path_info = val["path"];
+            QJsonValue size_info = val["size"];
+            QJsonValue fileName = val["fileName"];
+            QJsonValue dataCreate = val["dataCreate"];
+            QJsonValue lastModified = val["lastModified"];
+
+            QSqlQuery query;
+
+            query.prepare("INSERT INTO monitoring (path, fileName, size, dataCreate, lastModified) "
+                          "VALUES (:path, :fileName, :size, :dataCreate, :lastModified)");
+            query.bindValue(":path",            path_info.toString());
+            query.bindValue(":fileName",        size_info.toString());
+            query.bindValue(":size",             fileName.toInt());
+            query.bindValue(":dataCreate",     dataCreate.toString());
+            query.bindValue(":lastModified", lastModified.toString());
+            if (!query.exec()) {
+                qDebug() << "Ошибка добавления данных:" << query.lastError().text();
+            } else {
+                qDebug() << "Данные успешно добавлены!";
+            }
         }
-        else
+        else {
             ui->FilesList->addItem("Ошибка JSON");
-    }
-    else
-        ui->FilesList->addItem("Ошибка JSON");
+        }
 
 }
 
@@ -186,3 +217,36 @@ void MainWindow::on_StartMonitoringButton_clicked()
         ui->statusbar->showMessage("Нет выделенной строки");
     }
 }
+
+void MainWindow::on_action_4_triggered()
+{
+    QString filePath = QFileDialog::getSaveFileName(this, "Выбор файла SQL_Lite", "", "SQLite(*.db *.sqlite *.sqlite3);;All Files (*.*)");
+        if (filePath.isEmpty()) {
+            return;
+        }
+        if (QFile::exists(filePath)) {
+            ui->statusbar->showMessage("База данных очищена!");
+        }
+        db = QSqlDatabase::addDatabase("QSQLITE");
+        db.setDatabaseName(filePath);
+        if (db.open()) {
+            ui->statusbar->showMessage("База данных успешно загружена!");
+        } else {
+            ui->statusbar->showMessage("Ошибка создания Базы данных!");
+        }
+        QSqlQuery query;
+        if (!query.exec(
+                  "create table monitoring "
+                  "(id integer primary key, "
+                  "path varchar(100), "
+                  "fileName varchar(60), "
+                  "size integer, "
+                  "dataCreate varchar(60), "
+                  "lastModified varchar(60))"))
+
+        {
+
+        ui->statusbar->showMessage("Ошибка создания Базы данных!");
+}
+}
+

@@ -347,26 +347,39 @@
      <x>0</x>
      <y>0</y>
      <width>894</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
     <property name="title">
      <string>Меню</string>
     </property>
-    <addaction name="action_2"/>
+    <widget class="QMenu" name="menu_2">
+     <property name="title">
+      <string>Работа с БД</string>
+     </property>
+     <addaction name="action_4"/>
+     <addaction name="action_5"/>
+    </widget>
+    <addaction name="menu_2"/>
+    <addaction name="action_6"/>
    </widget>
    <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="action">
+  <action name="action_4">
    <property name="text">
-    <string>Определить файл</string>
+    <string>Выбрать файл БД</string>
    </property>
   </action>
-  <action name="action_2">
+  <action name="action_5">
    <property name="text">
-    <string>Сохранить отчет</string>
+    <string>Загрузить файл БД</string>
+   </property>
+  </action>
+  <action name="action_6">
+   <property name="text">
+    <string>Сохранить Отчет</string>
    </property>
   </action>
  </widget>

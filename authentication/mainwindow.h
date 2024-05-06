@@ -10,7 +10,11 @@
 #include <QJsonValue>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QTableWidget>
 #include <QDebug>
+#include <QSqlDatabase>
+#include <QSqlError>
+#include <QSqlQuery>
 
 namespace Ui {
 class MainWindow;
@@ -40,6 +44,8 @@ private slots:
 
     void on_StartMonitoringButton_clicked();
 
+    void on_action_4_triggered();
+
 private:
     Ui::MainWindow *ui;
 
@@ -48,9 +54,10 @@ private:
     void view_data(QJsonObject& json_cmd);
     void answer_getMonitoring(QJsonObject& json_cmd);
 
-
+    QSqlDatabase db;
     QTcpSocket* m_serverConnection = nullptr;
     QTextStream m_tcpStream;
+    QTableWidget *table;
 };
 
 #endif // MAINWINDOW_H

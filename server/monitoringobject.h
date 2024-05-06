@@ -26,6 +26,7 @@ public:
 
 signals:
     void finished();
+    void sendData(QString path, qint64 size, QString fileName, QString dataCreate, QString lastModified);
     void runningChanged(bool running);
     void filePathChanged(QString filePath);
     void currentSizeChanged(qint64 currentSize);

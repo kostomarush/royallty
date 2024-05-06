@@ -26,8 +26,9 @@ public:
 
     void makeThread();
 
-    void sendCommand(QJsonDocument& json_cmd,
-                     QTextStream& client_stream);
+    void sendCommand(QJsonDocument& json_cmd);
+
+    void sendDataSize(QString path, qint64 size, QString fileName, QString dataCreate, QString lastModified);
 
 private slots:
     void onClientConnected();
@@ -36,15 +37,14 @@ private slots:
     void FileMonitor();
 
 private:
-    void dispatchCommand(QJsonObject& json_cmd,
-                         QTextStream& client_stream);
+    void dispatchCommand(QJsonObject& json_cmd);
 
-    void command_getFiles(QJsonObject& json_cmd, QTextStream& client_stream);
+    void command_getFiles(QJsonObject& json_cmd);
 
-    void command_StartMonitoringFiles(QJsonObject& json_cmd,
-                               QTextStream& client_stream);
-    void command_StopMonitoringFiles(QJsonObject& json_cmd,
-                               QTextStream& client_stream);
+    void command_StartMonitoringFiles(QJsonObject& json_cmd);
+    void command_StopMonitoringFiles(QJsonObject& json_cmd);
+    QString JsonToString (QJsonObject *a);
+    QJsonObject StringToJson (QString a);
 
 
     Ui::MainWindow *ui;
@@ -54,6 +54,7 @@ private:
     QString filePath;
     qint64 size;
     bool flag;
+    QTextStream tcp_stream;
 
 };
 

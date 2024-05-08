@@ -34,7 +34,6 @@ private slots:
     void onClientConnected();
     void onClientDisconnected();
     void onClientReadData();
-    void FileMonitor();
 
 private:
     void dispatchCommand(QJsonObject& json_cmd);
@@ -42,7 +41,7 @@ private:
     void command_getFiles(QJsonObject& json_cmd);
 
     void command_StartMonitoringFiles(QJsonObject& json_cmd);
-    void command_StopMonitoringFiles(QJsonObject& json_cmd);
+    void command_StopMonitoringFiles();
     QString JsonToString (QJsonObject *a);
     QJsonObject StringToJson (QString a);
 

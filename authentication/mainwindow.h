@@ -15,6 +15,10 @@
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QVector>
+#include <algorithm>
+#include <QFile>
+#include <QAxObject>
 
 namespace Ui {
 class MainWindow;
@@ -46,6 +50,15 @@ private slots:
 
     void on_action_4_triggered();
 
+    void on_action_5_triggered();
+
+    void on_pushButton_clicked();
+
+    void on_action_6_triggered();
+
+    void on_pushButton_2_clicked();
+
+
 private:
     Ui::MainWindow *ui;
 
@@ -55,9 +68,10 @@ private:
     void answer_getMonitoring(QJsonObject& json_cmd);
 
     QSqlDatabase db;
+    QAxObject *excel;
     QTcpSocket* m_serverConnection = nullptr;
     QTextStream m_tcpStream;
-    QTableWidget *table;
+
 };
 
 #endif // MAINWINDOW_H

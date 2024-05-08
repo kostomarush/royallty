@@ -87,7 +87,7 @@ void MainWindow::dispatchCommand(QJsonObject &json_cmd)
             command_StartMonitoringFiles(json_cmd);
         }
         else if (cmd == "StopMonitoring") {
-            command_StopMonitoringFiles(json_cmd);
+            command_StopMonitoringFiles();
         }
         else
             ui->listWidget->addItem("Неизвестная команда");
@@ -110,7 +110,6 @@ void MainWindow::command_getFiles(QJsonObject &json_cmd)
             while (dirit.hasNext()) {
                 dirit.next();
                 filesArray.push_back(dirit.filePath());
-                ui->listWidget->addItem(dirit.filePath());
             }
             answer.insert("files", filesArray);
             doc.setObject(answer);
@@ -145,7 +144,7 @@ void MainWindow::command_StartMonitoringFiles(QJsonObject &json_cmd)
 
 }
 
-void MainWindow::command_StopMonitoringFiles(QJsonObject &json_cmd)
+void MainWindow::command_StopMonitoringFiles()
 {
     monitoringObject.setRunning(false);
 }
@@ -182,13 +181,6 @@ void MainWindow::sendDataSize(QString path, qint64 size, QString fileName, QStri
     doc.setObject(answer);
     sendCommand(doc);
 }
-
-void MainWindow::FileMonitor(){
-    //sendCommand(doc, client_stream);
-
-
-}
-
 
 
 
